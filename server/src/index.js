@@ -37,6 +37,22 @@ connectDB();
 initSocket(server);
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
+app.get('/', (req, res) => {
+  res.json({
+    status: 'online',
+    name: 'Jack AI Server API',
+    version: '1.0.0',
+    message: 'Jack AI Core Server chal raha hai ✅',
+    endpoints: {
+      health: '/api/health',
+      voice: '/api/voice',
+      commands: '/api/commands',
+      devices: '/api/devices',
+      memory: '/api/memory',
+    },
+  });
+});
+
 app.use('/api/commands', require('./routes/commands'));
 app.use('/api/devices', require('./routes/devices'));
 app.use('/api/memory', require('./routes/memory'));
@@ -87,11 +103,13 @@ app.use((req, res) => {
 
 // ─── Start Server ─────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log('\n╔══════════════════════════════════════╗');
-  console.log('║      🤖 Jack AI Server Started       ║');
-  console.log(`║   Port: ${PORT}  |  Mode: ${process.env.NODE_ENV || 'development'}  ║`);
-  console.log('╚══════════════════════════════════════╝\n');
-});
+if (!process.env.VERCEL) {
+  server.listen(PORT, () => {
+    console.log('\n╔══════════════════════════════════════╗');
+    console.log('║      🤖 Jack AI Server Started       ║');
+    console.log(`║   Port: ${PORT}  |  Mode: ${process.env.NODE_ENV || 'development'}  ║`);
+    console.log('╚══════════════════════════════════════╝\n');
+  });
+}
 
-module.exports = { app, server };
+module.exports = app;

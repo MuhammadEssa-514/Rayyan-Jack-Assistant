@@ -95,10 +95,51 @@ const parseAIResponse = (text) => {
   }
 };
 
-// ─── Main: Process text through Ollama ───────────────────────────────────────
+// ─── Main: Process text through Ollama or Groq Cloud ───────────────────────
 const processWithOllama = async (userText, memoryContext = '') => {
   const startTime = Date.now();
 
+  // 1. If GROQ_API_KEY is available (e.g. Vercel deployment), use Groq Cloud API
+  if (process.env.GROQ_API_KEY) {
+    try {
+      console.log('⚡ Processing via Groq Cloud AI API...');
+      const groqMessages = [
+        { role: 'system', content: SYSTEM_PROMPT },
+      ];
+      if (memoryContext) {
+        groqMessages.push({ role: 'system', content: `YAAD RAKHNE WALI CHEEZEIN:\n${memoryContext}` });
+      }
+      groqMessages.push({ role: 'user', content: userText });
+
+      const response = await axios.post(
+        'https://api.groq.com/openai/v1/chat/completions',
+        {
+          model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
+          messages: groqMessages,
+          temperature: 0.1,
+          response_format: { type: 'json_object' },
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          timeout: 15000,
+        }
+      );
+
+      const rawText = response.data?.choices?.[0]?.message?.content || '';
+      const parsed = parseAIResponse(rawText);
+      const duration = Date.now() - startTime;
+      console.log(`🧠 Groq AI [${duration}ms]: ${parsed.intent} → ${parsed.target} (${(parsed.confidence * 100).toFixed(0)}%)`);
+      return { ...parsed, _processingTime: duration };
+    } catch (groqErr) {
+      console.error('❌ Groq API error:', groqErr.response?.data || groqErr.message);
+      // Fallthrough to Ollama
+    }
+  }
+
+  // 2. Local Ollama processing
   try {
     // Build messages
     const messages = [
