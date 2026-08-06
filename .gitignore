@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+
+# Environment
+.env
+*.env.local
+
+# Build outputs
+.next/
+dist/
+build/
+out/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Models (large files - download separately)
+voice-engine/models/
+windows-agent/models/
+
+# Database
+*.db
+*.sqlite
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Android
+android-app/android/
+android-app/ios/
+android-app/.gradle/
+
+# Misc
+*.pem
+*.key
